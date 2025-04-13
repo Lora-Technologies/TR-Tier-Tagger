@@ -59,6 +59,27 @@ public class PlayerInfoScreen extends CloseableScreen {
                     .whenComplete((v, t) -> {
                         if (t != null) {
                             this.everythingIsAwesome = false;
+                        } else {
+                            int rankingHeight = this.info.rankings().size() * 10;
+                            int infoHeight = 56; // 4 lines of text (10 px tall) + 6 px padding
+                            int startY = (this.height - infoHeight - rankingHeight) / 2;
+                            int rankingY = startY + infoHeight;
+
+                            for (PlayerInfo.NamedRanking namedRanking : this.info.getSortedTiers()) {
+                                // ugly "fix" to avoid crashes if upstream doesn't have the right names
+                                if (namedRanking.mode() == null) continue;
+
+                                TextWidget text = new TextWidget(formatTier(namedRanking.mode(), namedRanking.ranking()), this.textRenderer);
+                                text.setX(this.width / 2 + 5);
+                                text.setY(rankingY);
+
+                                String date = DateTimeFormatter.ISO_LOCAL_DATE.withZone(ZoneOffset.UTC).format(Instant.ofEpochSecond(namedRanking.ranking().attained()));
+                                Text tooltipText = Text.literal("Attained: " + date + "\nPoints: " + points(namedRanking.ranking())).formatted(Formatting.GRAY);
+                                text.setTooltip(Tooltip.of(tooltipText));
+
+                                this.addDrawableChild(text);
+                                rankingY += 11;
+                            }
                         }
                     });
         }
@@ -82,23 +103,6 @@ public class PlayerInfoScreen extends CloseableScreen {
             context.drawTextWithShadow(this.textRenderer, getPointsText(this.info), this.width / 2 + 5, startY + 15, 0xFFFFFF);
             context.drawTextWithShadow(this.textRenderer, getRankText(this.info), this.width / 2 + 5, startY + 30, 0xFFFFFF);
             context.drawTextWithShadow(this.textRenderer, "Rankings:", this.width / 2 + 5, startY + 45, 0xFFFFFF);
-
-            int rankingY = startY + infoHeight;
-            for (PlayerInfo.NamedRanking namedRanking : this.info.getSortedTiers()) {
-                // ugly "fix" to avoid crashes if upstream doesn't have the right names
-                if (namedRanking.mode() == null) continue;
-
-                TextWidget text = new TextWidget(formatTier(namedRanking.mode(), namedRanking.ranking()), this.textRenderer);
-                text.setX(this.width / 2 + 5);
-                text.setY(rankingY);
-
-                String date = DateTimeFormatter.ISO_LOCAL_DATE.withZone(ZoneOffset.UTC).format(Instant.ofEpochSecond(namedRanking.ranking().attained()));
-                Text tooltipText = Text.literal("Attained: " + date + "\nPoints: " + points(namedRanking.ranking())).formatted(Formatting.GRAY);
-                text.setTooltip(Tooltip.of(tooltipText));
-
-                this.addDrawableChild(text);
-                rankingY += 11;
-            }
         } else {
             String text = this.everythingIsAwesome ? "Loading..." : "Unknown player";
             context.drawCenteredTextWithShadow(this.textRenderer, text, this.width / 2, this.height / 2, 0xFFFFFF);
