@@ -106,11 +106,11 @@ public class TierTagger implements ModInitializer {
     }
 
     public static Optional<PlayerInfo.NamedRanking> getPlayerTier(UUID uuid) {
-        String mode = manager.getConfig().getGameMode();
+        GameMode mode = manager.getConfig().getGameMode();
 
         return TierCache.getPlayerInfo(uuid)
                 .map(info -> {
-                    PlayerInfo.Ranking ranking = info.rankings().get(mode);
+                    PlayerInfo.Ranking ranking = info.rankings().get(mode.id());
                     return ranking == null ? null : ranking.asNamed(mode);
                 });
     }

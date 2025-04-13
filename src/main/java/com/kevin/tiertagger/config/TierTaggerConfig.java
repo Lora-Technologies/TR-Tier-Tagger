@@ -1,5 +1,7 @@
 package com.kevin.tiertagger.config;
 
+import com.kevin.tiertagger.TierCache;
+import com.kevin.tiertagger.model.GameMode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,6 +9,7 @@ import lombok.Setter;
 import net.minecraft.util.TranslatableOption;
 
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 @Getter
 @Setter
@@ -27,6 +30,16 @@ public class TierTaggerConfig implements Serializable {
      * <p>previous name(s): {@code apiUrl}</p>
      */
     private String baseUrl = "https://api.uku3lig.net/tiers";
+
+    public GameMode getGameMode() {
+        try {
+            return TierCache.findMode(this.gameMode);
+        } catch (NoSuchElementException e) {
+            GameMode first = TierCache.GAMEMODES.getFirst();
+            this.gameMode = first.id();
+            return first;
+        }
+    }
 
     @Getter
     @AllArgsConstructor

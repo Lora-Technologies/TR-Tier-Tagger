@@ -1,6 +1,7 @@
 {
   "tiertagger.name": "TierTagger",
   "tiertagger.config": "Settings",
+  "tiertagger.config.tierlists": "Tierlists",
   "tiertagger.config.enabled": "Enabled",
   "tiertagger.config.gamemode": "Gamemode",
   "tiertagger.config.retired": "Show Retired",

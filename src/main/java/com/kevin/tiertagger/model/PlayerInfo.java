@@ -38,8 +38,8 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
             }
         }
 
-        public NamedRanking asNamed(String modeId) {
-            return new NamedRanking(TierCache.findMode(modeId), this);
+        public NamedRanking asNamed(GameMode mode) {
+            return new NamedRanking(mode, this);
         }
     }
 
@@ -129,7 +129,7 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
 
     public List<NamedRanking> getSortedTiers() {
         List<NamedRanking> tiers = new ArrayList<>(this.rankings.entrySet().stream()
-                .map(e -> e.getValue().asNamed(e.getKey()))
+                .map(e -> e.getValue().asNamed(TierCache.findMode(e.getKey())))
                 .toList());
 
         tiers.sort(Comparator.comparing((NamedRanking a) -> a.ranking.retired, Boolean::compare)
