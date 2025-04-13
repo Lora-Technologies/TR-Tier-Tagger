@@ -1,6 +1,7 @@
 package com.kevin.tiertagger.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.kevin.tiertagger.TierCache;
 import com.kevin.tiertagger.TierTagger;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.net.http.HttpResponse;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public record PlayerInfo(String uuid, String name, Map<GameMode, Ranking> rankings, String region, int points,
+public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings, String region, int points,
                          int overall, List<Badge> badges, @SerializedName("combat_master") boolean combatMaster) {
     public record Ranking(int tier, int pos, @Nullable @SerializedName("peak_tier") Integer peakTier,
                           @Nullable @SerializedName("peak_pos") Integer peakPos, long attained,
@@ -35,6 +36,10 @@ public record PlayerInfo(String uuid, String name, Map<GameMode, Ranking> rankin
             } else {
                 return peakTier * 2 + peakPos;
             }
+        }
+
+        public NamedRanking asNamed(String modeId) {
+            return new NamedRanking(TierCache.findMode(modeId), this);
         }
     }
 
@@ -82,7 +87,7 @@ public record PlayerInfo(String uuid, String name, Map<GameMode, Ranking> rankin
         return REGION_COLORS.getOrDefault(this.region.toUpperCase(Locale.ROOT), 0xffffff);
     }
 
-    public Optional<Map.Entry<GameMode, Ranking>> getHighestRanking() {
+    public Optional<Map.Entry<String, Ranking>> getHighestRanking() {
         return this.rankings.entrySet().stream()
                 .filter(e -> e.getKey() != null)
                 .min(Comparator.comparingInt(e -> e.getValue().comparableTier()));
@@ -124,7 +129,7 @@ public record PlayerInfo(String uuid, String name, Map<GameMode, Ranking> rankin
 
     public List<NamedRanking> getSortedTiers() {
         List<NamedRanking> tiers = new ArrayList<>(this.rankings.entrySet().stream()
-                .map(e -> new NamedRanking(e.getKey(), e.getValue()))
+                .map(e -> e.getValue().asNamed(e.getKey()))
                 .toList());
 
         tiers.sort(Comparator.comparing((NamedRanking a) -> a.ranking.retired, Boolean::compare)

@@ -1,17 +1,18 @@
 package com.kevin.tiertagger;
 
+import com.kevin.tiertagger.model.GameMode;
 import com.kevin.tiertagger.model.PlayerInfo;
-import com.kevin.tiertagger.model.TierList;
+import com.kevin.tiertagger.model.PlayerList;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class TierCache {
+    public static final List<GameMode> GAMEMODES = new ArrayList<>();
     private static final Map<UUID, Optional<PlayerInfo>> TIERS = new ConcurrentHashMap<>();
 
     /**
@@ -23,7 +24,7 @@ public class TierCache {
     private static final AtomicBoolean FETCH_UNKNOWN = new AtomicBoolean(true);
 
     public static void init() {
-        TierList.get(TierTagger.getClient()).thenAccept(list -> {
+        PlayerList.get(TierTagger.getClient()).thenAccept(list -> {
             Map<UUID, Optional<PlayerInfo>> players = list.players().stream().collect(Collectors.toMap(p -> parseUUID(p.uuid()), Optional::of));
             Map<UUID, Optional<PlayerInfo>> unknown = list.unknown().stream().collect(Collectors.toMap(u -> u, u -> Optional.empty()));
 
@@ -39,6 +40,15 @@ public class TierCache {
 
             TierTagger.getLogger().info("Loaded {} players and {} unknown", players.size(), unknown.size());
         });
+
+        try {
+            GAMEMODES.addAll(GameMode.fetchGamemodes(TierTagger.getClient()).get());
+            TierTagger.getLogger().info("Found {} tierlists: {}", GAMEMODES.size(), GAMEMODES.stream().map(GameMode::id).toList());
+        } catch (ExecutionException e) {
+            TierTagger.getLogger().error("Failed to load gamemodes!", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public static Optional<PlayerInfo> getPlayerInfo(UUID uuid) {
@@ -65,6 +75,23 @@ public class TierCache {
 
     public static void clearCache() {
         TIERS.clear();
+    }
+
+    public static GameMode findNextMode(String currentId) {
+        int index = -1;
+
+        ListIterator<GameMode> iterator = GAMEMODES.listIterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().id().equalsIgnoreCase(currentId)) {
+                index = iterator.previousIndex();
+            }
+        }
+
+        return GAMEMODES.get((index + 1) % GAMEMODES.size());
+    }
+
+    public static GameMode findMode(String id) {
+        return GAMEMODES.stream().filter(m -> m.id().equalsIgnoreCase(id)).findFirst().orElseThrow();
     }
 
     private static UUID parseUUID(String uuid) {

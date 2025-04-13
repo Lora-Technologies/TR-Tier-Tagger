@@ -1,6 +1,5 @@
 package com.kevin.tiertagger.config;
 
-import com.kevin.tiertagger.model.GameMode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,11 +14,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class TierTaggerConfig implements Serializable {
     private boolean enabled = true;
-    private GameMode gameMode = GameMode.VANILLA;
+    private String gameMode = "vanilla";
     private boolean showRetired = true;
-    private HighestMode highestMode = HighestMode.NOT_FOUND;
+    // private HighestMode highestMode = HighestMode.NOT_FOUND;
     private Statistic shownStatistic = Statistic.TIER;
-    private boolean showIcons = true;
+    // private boolean showIcons = true;
 
     // === internal stuff ===
 

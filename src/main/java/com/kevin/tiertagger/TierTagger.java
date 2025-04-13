@@ -36,7 +36,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,7 +47,7 @@ public class TierTagger implements ModInitializer {
     public static final String MOD_ID = "tiertagger";
     private static final String UPDATE_URL_FORMAT = "https://api.modrinth.com/v2/project/dpkYdLu5/version?game_versions=%s";
 
-    public static final Gson GSON = new GsonBuilder().registerTypeAdapter(GameMode.class, new GameMode.Deserializer()).create();
+    public static final Gson GSON = new GsonBuilder().create();
 
     @Getter
     private static final ConfigManager<TierTaggerConfig> manager = ConfigManager.createDefault(TierTaggerConfig.class, MOD_ID);
@@ -73,11 +72,11 @@ public class TierTagger implements ModInitializer {
 
         Ukutils.registerKeybinding(new KeyBinding("tiertagger.keybind.gamemode", GLFW.GLFW_KEY_UNKNOWN, "tiertagger.name"),
                 mc -> {
-                    GameMode next = manager.getConfig().getGameMode().next();
-                    manager.getConfig().setGameMode(next);
+                    GameMode next = TierCache.findNextMode(manager.getConfig().getGameMode());
+                    manager.getConfig().setGameMode(next.id());
 
                     if (mc.player != null) {
-                        Text message = Text.literal("Displayed gamemode: ").append(next.formatted());
+                        Text message = Text.literal("Displayed gamemode: " + next.title());
                         mc.player.sendMessage(message, true);
                     }
                 });
@@ -89,16 +88,8 @@ public class TierTagger implements ModInitializer {
         MutableText following = switch (manager.getConfig().getShownStatistic()) {
             case TIER -> getPlayerTier(player.getUuid())
                     .map(entry -> {
-                        String tier = getTierText(entry.getValue());
-                        MutableText formattedTier = Text.literal(tier).withColor(getTierColor(tier));
-
-                        if (manager.getConfig().isShowIcons()) {
-                            Text modeIcon = Text.literal(entry.getKey().getIcon()).styled(s -> s.withColor(entry.getKey().getIconColor()));
-
-                            return Text.empty().append(modeIcon).append(" ").append(formattedTier);
-                        } else {
-                            return formattedTier;
-                        }
+                        String tier = getTierText(entry.ranking());
+                        return Text.literal(tier).withColor(getTierColor(tier));
                     })
                     .orElse(null);
             case RANK -> TierCache.getPlayerInfo(player.getUuid())
@@ -114,28 +105,13 @@ public class TierTagger implements ModInitializer {
         return text;
     }
 
-    public static Optional<Map.Entry<GameMode, PlayerInfo.Ranking>> getPlayerTier(UUID uuid) {
-        GameMode mode = manager.getConfig().getGameMode();
+    public static Optional<PlayerInfo.NamedRanking> getPlayerTier(UUID uuid) {
+        String mode = manager.getConfig().getGameMode();
 
         return TierCache.getPlayerInfo(uuid)
                 .map(info -> {
                     PlayerInfo.Ranking ranking = info.rankings().get(mode);
-                    Optional<Map.Entry<GameMode, PlayerInfo.Ranking>> highest = info.getHighestRanking();
-                    TierTaggerConfig.HighestMode highestMode = manager.getConfig().getHighestMode();
-
-                    if (ranking == null) {
-                        if (highestMode != TierTaggerConfig.HighestMode.NEVER && highest.isPresent()) {
-                            return highest.get();
-                        } else {
-                            return null;
-                        }
-                    } else {
-                        if (highestMode == TierTaggerConfig.HighestMode.ALWAYS && highest.isPresent()) {
-                            return highest.get();
-                        } else {
-                            return Map.entry(mode, ranking);
-                        }
-                    }
+                    return ranking == null ? null : ranking.asNamed(mode);
                 });
     }
 
@@ -177,10 +153,11 @@ public class TierTagger implements ModInitializer {
 
         info.rankings().forEach((m, r) -> {
             if (m == null) return;
+            GameMode mode = TierCache.findMode(m);
             String tier = getTierText(r);
 
             Text tierText = Text.literal(tier).styled(s -> s.withColor(getTierColor(tier)));
-            text.append(Text.literal("\n").append(m.formatted()).append(": ").append(tierText));
+            text.append(Text.literal("\n").append(mode.title()).append(": ").append(tierText));
         });
 
         return text;
