@@ -164,16 +164,11 @@ public class TierTagger implements ModInitializer {
     }
 
     public static int getTierColor(String tier) {
-        if (tier.startsWith("R")) return 0xa2d6ff;
-        else return switch (tier) {
-            case "HT1" -> 0xffc935;
-            case "LT1" -> 0xd5b355;
-            case "HT2" -> 0xa4b3c7;
-            case "LT2" -> 0x888d95;
-            case "HT3" -> 0xb56326;
-            case "LT3" -> 0x8f5931;
-            default -> 0x655b79;
-        };
+        if (tier.startsWith("R")) {
+            return manager.getConfig().getRetiredColor();
+        } else {
+            return manager.getConfig().getTierColors().getOrDefault(tier, 0xD3D3D3);
+        }
     }
 
     private static void checkForUpdates() {

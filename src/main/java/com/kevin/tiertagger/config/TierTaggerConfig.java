@@ -1,6 +1,7 @@
 package com.kevin.tiertagger.config;
 
 import com.kevin.tiertagger.TierCache;
+import com.google.gson.internal.LinkedTreeMap;
 import com.kevin.tiertagger.model.GameMode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,9 @@ public class TierTaggerConfig implements Serializable {
     // private HighestMode highestMode = HighestMode.NOT_FOUND;
     private Statistic shownStatistic = Statistic.TIER;
     // private boolean showIcons = true;
+    private int retiredColor = 0xa2d6ff;
+    // note: this is a GSON internal class. this *might* break in the future
+    private LinkedTreeMap<String, Integer> tierColors = defaultColors();
 
     // === internal stuff ===
 
@@ -39,6 +43,22 @@ public class TierTaggerConfig implements Serializable {
             this.gameMode = first.id();
             return first;
         }
+    }
+
+    private static LinkedTreeMap<String, Integer> defaultColors() {
+        LinkedTreeMap<String, Integer> colors = new LinkedTreeMap<>();
+        colors.put("HT1", 0xffc935);
+        colors.put("LT1", 0xd5b355);
+        colors.put("HT2", 0xa4b3c7);
+        colors.put("LT2", 0x888d95);
+        colors.put("HT3", 0xb56326);
+        colors.put("LT3", 0x8f5931);
+        colors.put("HT4", 0x655b79);
+        colors.put("LT4", 0x655b79);
+        colors.put("HT5", 0x655b79);
+        colors.put("LT5", 0x655b79);
+
+        return colors;
     }
 
     @Getter

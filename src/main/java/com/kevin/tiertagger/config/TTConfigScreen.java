@@ -7,17 +7,12 @@ import com.kevin.tiertagger.tierlist.PlayerSearchScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tab.Tab;
 import net.minecraft.text.Text;
-import net.uku3lig.ukulib.config.option.CyclingOption;
-import net.uku3lig.ukulib.config.option.ScreenOpenButton;
-import net.uku3lig.ukulib.config.option.SimpleButton;
-import net.uku3lig.ukulib.config.option.WidgetCreator;
+import net.uku3lig.ukulib.config.option.*;
 import net.uku3lig.ukulib.config.option.widget.ButtonTab;
 import net.uku3lig.ukulib.config.screen.TabbedConfigScreen;
 import net.uku3lig.ukulib.utils.Ukutils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TTConfigScreen extends TabbedConfigScreen<TierTaggerConfig> {
@@ -27,7 +22,7 @@ public class TTConfigScreen extends TabbedConfigScreen<TierTaggerConfig> {
 
     @Override
     protected Tab[] getTabs(TierTaggerConfig config) {
-        return new Tab[]{new MainSettingsTab(), new TierlistTab()};
+        return new Tab[]{new MainSettingsTab(), new ColorsTab(), new TierlistTab()};
     }
 
     public class MainSettingsTab extends ButtonTab<TierTaggerConfig> {
@@ -78,6 +73,28 @@ public class TTConfigScreen extends TabbedConfigScreen<TierTaggerConfig> {
             }
 
             return widgets.toArray(WidgetCreator[]::new);
+        }
+    }
+
+    public class ColorsTab extends ButtonTab<TierTaggerConfig> {
+        protected ColorsTab() {
+            super("tiertagger.colors", TTConfigScreen.this.manager);
+        }
+
+        @Override
+        protected WidgetCreator[] getWidgets(TierTaggerConfig config) {
+            // i genuinely don't understand but chaining the calls just EXPLODES????
+            Comparator<Map.Entry<String, Integer>> comparator = Comparator.comparing(e -> e.getKey().charAt(2));
+            comparator = comparator.thenComparing(e -> e.getKey().charAt(0));
+
+            List<ColorOption> tiers = config.getTierColors().entrySet().stream()
+                    .sorted(comparator)
+                    .map(e -> new ColorOption(e.getKey(), e.getValue(), val -> config.getTierColors().put(e.getKey(), val)))
+                    .collect(Collectors.toList());
+
+            tiers.addLast(new ColorOption("tiertagger.colors.retired", config.getRetiredColor(), config::setRetiredColor));
+
+            return tiers.toArray(WidgetCreator[]::new);
         }
     }
 }
