@@ -87,10 +87,11 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
         return REGION_COLORS.getOrDefault(this.region.toUpperCase(Locale.ROOT), 0xffffff);
     }
 
-    public Optional<Map.Entry<String, Ranking>> getHighestRanking() {
+    public Optional<NamedRanking> getHighestRanking() {
         return this.rankings.entrySet().stream()
                 .filter(e -> e.getKey() != null)
-                .min(Comparator.comparingInt(e -> e.getValue().comparableTier()));
+                .min(Comparator.comparingInt(e -> e.getValue().comparableTier()))
+                .map(e -> e.getValue().asNamed(TierCache.findMode(e.getKey())));
     }
 
     @Getter

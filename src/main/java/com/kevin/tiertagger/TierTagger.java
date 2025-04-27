@@ -89,7 +89,13 @@ public class TierTagger implements ModInitializer {
             case TIER -> getPlayerTier(player.getUuid())
                     .map(entry -> {
                         String tier = getTierText(entry.ranking());
-                        return Text.literal(tier).withColor(getTierColor(tier));
+                        MutableText tierText = Text.literal(tier).withColor(getTierColor(tier));
+
+                        if (manager.getConfig().isShowIcons() && entry.mode() != null && entry.mode().icon().isPresent()) {
+                            return Text.literal(entry.mode().icon().get().toString()).append(tierText);
+                        } else {
+                            return tierText;
+                        }
                     })
                     .orElse(null);
             case RANK -> TierCache.getPlayerInfo(player.getUuid())
@@ -111,7 +117,22 @@ public class TierTagger implements ModInitializer {
         return TierCache.getPlayerInfo(uuid)
                 .map(info -> {
                     PlayerInfo.Ranking ranking = info.rankings().get(mode.id());
-                    return ranking == null ? null : ranking.asNamed(mode);
+                    Optional<PlayerInfo.NamedRanking> highest = info.getHighestRanking();
+                    TierTaggerConfig.HighestMode highestMode = manager.getConfig().getHighestMode();
+
+                    if (ranking == null) {
+                        if (highestMode != TierTaggerConfig.HighestMode.NEVER && highest.isPresent()) {
+                            return highest.get();
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        if (highestMode == TierTaggerConfig.HighestMode.ALWAYS && highest.isPresent()) {
+                            return highest.get();
+                        } else {
+                            return ranking.asNamed(mode);
+                        }
+                    }
                 });
     }
 

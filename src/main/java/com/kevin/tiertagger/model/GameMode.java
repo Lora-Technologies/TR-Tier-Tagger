@@ -12,6 +12,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public record GameMode(String id, String title) {
@@ -30,8 +31,8 @@ public record GameMode(String id, String title) {
                 });
     }
 
-    public Text asStyled(boolean withDefaultDot) {
-        Pair<Character, TextColor> pair = switch (this.id) {
+    private Pair<Character, TextColor> iconAndColor() {
+        return switch (this.id) {
             case "axe" -> new Pair<>('\uE701', TextColor.fromFormatting(Formatting.GREEN));
             case "mace" -> new Pair<>('\uE702', TextColor.fromFormatting(Formatting.GRAY));
             case "nethop", "neth_pot" -> new Pair<>('\uE703', TextColor.fromRgb(0x7d4a40));
@@ -54,6 +55,16 @@ public record GameMode(String id, String title) {
             case "trident" -> new Pair<>('\uE812', TextColor.fromRgb(0x579b8c));
             default -> new Pair<>('•', TextColor.fromFormatting(Formatting.WHITE));
         };
+    }
+
+    public Optional<Character> icon() {
+        Pair<Character, TextColor> pair = this.iconAndColor();
+
+        return pair.getRight().getRgb() == 0xFFFFFF ? Optional.empty() : Optional.of(pair.getLeft());
+    }
+
+    public Text asStyled(boolean withDefaultDot) {
+        Pair<Character, TextColor> pair = this.iconAndColor();
 
         if (pair.getRight().getRgb() == 0xFFFFFF && !withDefaultDot) {
             return Text.of(this.title);
