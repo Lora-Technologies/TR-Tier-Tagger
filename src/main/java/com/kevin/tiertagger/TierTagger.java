@@ -76,7 +76,7 @@ public class TierTagger implements ModInitializer {
                     manager.getConfig().setGameMode(next.id());
 
                     if (mc.player != null) {
-                        Text message = Text.literal("Displayed gamemode: " + next.title());
+                        Text message = Text.literal("Displayed gamemode: ").append(next.asStyled(false));
                         mc.player.sendMessage(message, true);
                     }
                 });
@@ -157,7 +157,7 @@ public class TierTagger implements ModInitializer {
             String tier = getTierText(r);
 
             Text tierText = Text.literal(tier).styled(s -> s.withColor(getTierColor(tier)));
-            text.append(Text.literal("\n").append(mode.title()).append(": ").append(tierText));
+            text.append(Text.literal("\n").append(mode.asStyled(true)).append(": ").append(tierText));
         });
 
         return text;

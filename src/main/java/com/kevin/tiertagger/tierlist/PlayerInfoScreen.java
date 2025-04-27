@@ -160,8 +160,8 @@ public class PlayerInfoScreen extends CloseableScreen {
                     .append(Text.literal(")").styled(s -> s.withColor(Formatting.GRAY)));
         }
 
-        return Text.literal("• ")
-                .append(gamemode.title())
+        return Text.empty()
+                .append(gamemode.asStyled(true))
                 .append(Text.literal(": ").formatted(Formatting.GRAY))
                 .append(tierText);
     }
