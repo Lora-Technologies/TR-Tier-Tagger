@@ -58,8 +58,7 @@ public class TTConfigScreen extends TabbedConfigScreen<TierTaggerConfig> {
             List<WidgetCreator> widgets = Arrays.stream(TierList.values())
                     .map(t -> {
                         boolean isCurrent = current.isPresent() && current.get() == t;
-                        String text = isCurrent ? t.getName() + " (selected)" : t.getName();
-                        return new SimpleButton(text, b -> {
+                        return new SimpleButton(t.styledName(isCurrent), b -> {
                             config.setBaseUrl(t.getUrl());
                             TierTagger.getManager().saveConfig();
                             TTConfigScreen.this.close();

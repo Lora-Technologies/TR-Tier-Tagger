@@ -139,6 +139,20 @@
       "ascent": 8,
       "height": 8,
       "chars": ["\uE812"]
+    },
+    {
+      "type": "bitmap",
+      "file": "tier-tagger:tierlists/mctiers.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": ["\uE901"]
+    },
+    {
+      "type": "bitmap",
+      "file": "tier-tagger:tierlists/subtiers.png",
+      "ascent": 10,
+      "height": 12,
+      "chars": ["\uE902"]
     }
   ]
 }
