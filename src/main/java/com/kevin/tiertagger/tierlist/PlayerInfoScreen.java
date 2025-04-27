@@ -30,7 +30,9 @@ import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Setter
 public class PlayerInfoScreen extends CloseableScreen {
@@ -40,6 +42,11 @@ public class PlayerInfoScreen extends CloseableScreen {
     private Identifier texture;
     private PlayerInfo info;
     private boolean everythingIsAwesome = true;
+
+    /**
+     * Having a queue like this avoids a {@link java.util.ConcurrentModificationException} due to adding drawable children on a different thread
+     */
+    private final Queue<TextWidget> textWidgets = new ConcurrentLinkedQueue<>();
 
     public PlayerInfoScreen(Screen parent, String player) {
         super(Text.of("Player Info"), parent);
@@ -77,7 +84,7 @@ public class PlayerInfoScreen extends CloseableScreen {
                                 Text tooltipText = Text.literal("Attained: " + date + "\nPoints: " + points(namedRanking.ranking())).formatted(Formatting.GRAY);
                                 text.setTooltip(Tooltip.of(tooltipText));
 
-                                this.addDrawableChild(text);
+                                textWidgets.add(text);
                                 rankingY += 11;
                             }
                         }
@@ -88,6 +95,10 @@ public class PlayerInfoScreen extends CloseableScreen {
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         super.render(context, mouseX, mouseY, delta);
+
+        while (!textWidgets.isEmpty()) {
+            this.addDrawableChild(textWidgets.remove());
+        }
 
         String name = this.info == null ? this.player : this.info.name();
         context.drawCenteredTextWithShadow(this.textRenderer, name + "'s profile", this.width / 2, 20, 0xFFFFFF);
