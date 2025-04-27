@@ -47,15 +47,15 @@ public class TierTaggerConfig implements Serializable {
 
     private static LinkedTreeMap<String, Integer> defaultColors() {
         LinkedTreeMap<String, Integer> colors = new LinkedTreeMap<>();
-        colors.put("HT1", 0xffc935);
+        colors.put("HT1", 0xe8ba3a);
         colors.put("LT1", 0xd5b355);
-        colors.put("HT2", 0xa4b3c7);
-        colors.put("LT2", 0x888d95);
-        colors.put("HT3", 0xb56326);
-        colors.put("LT3", 0x8f5931);
-        colors.put("HT4", 0x655b79);
+        colors.put("HT2", 0xc4d3e7);
+        colors.put("LT2", 0xa0a7b2);
+        colors.put("HT3", 0xf89f5a);
+        colors.put("LT3", 0xc67b42);
+        colors.put("HT4", 0x81749a);
         colors.put("LT4", 0x655b79);
-        colors.put("HT5", 0x655b79);
+        colors.put("HT5", 0x8f82a8);
         colors.put("LT5", 0x655b79);
 
         return colors;
