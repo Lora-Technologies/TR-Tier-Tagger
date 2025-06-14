@@ -174,7 +174,7 @@ public class TierTagger implements ModInitializer {
 
         info.rankings().forEach((m, r) -> {
             if (m == null) return;
-            GameMode mode = TierCache.findMode(m);
+            GameMode mode = TierCache.findModeOrUgly(m);
             String tier = getTierText(r);
 
             Text tierText = Text.literal(tier).styled(s -> s.withColor(getTierColor(tier)));

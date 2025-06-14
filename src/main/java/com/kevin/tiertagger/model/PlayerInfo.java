@@ -91,7 +91,7 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
         return this.rankings.entrySet().stream()
                 .filter(e -> e.getKey() != null)
                 .min(Comparator.comparingInt(e -> e.getValue().comparableTier()))
-                .map(e -> e.getValue().asNamed(TierCache.findMode(e.getKey())));
+                .map(e -> e.getValue().asNamed(TierCache.findModeOrUgly(e.getKey())));
     }
 
     @Getter
@@ -130,7 +130,7 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
 
     public List<NamedRanking> getSortedTiers() {
         List<NamedRanking> tiers = new ArrayList<>(this.rankings.entrySet().stream()
-                .map(e -> e.getValue().asNamed(TierCache.findMode(e.getKey())))
+                .map(e -> e.getValue().asNamed(TierCache.findModeOrUgly(e.getKey())))
                 .toList());
 
         tiers.sort(Comparator.comparing((NamedRanking a) -> a.ranking.retired, Boolean::compare)

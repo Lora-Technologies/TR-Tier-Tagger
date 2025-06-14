@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public record GameMode(String id, String title) {
+    public static GameMode NONE = new GameMode("annoying_long_id_that_no_one_will_ever_use_just_to_make_sure", "§cNone§r");
+
     public static CompletableFuture<List<GameMode>> fetchGamemodes(HttpClient client) {
         String endpoint = TierTagger.getManager().getConfig().getBaseUrl() + "/tierlists";
         final HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint)).GET().build();
@@ -29,6 +31,10 @@ public record GameMode(String id, String title) {
                         return new GameMode(e.getKey(), title);
                     }).toList();
                 });
+    }
+
+    public boolean isNone() {
+        return this.id.equals(NONE.id);
     }
 
     private Pair<Character, TextColor> iconAndColor() {

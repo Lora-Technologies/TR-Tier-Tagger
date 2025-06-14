@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class TierCache {
-    public static final List<GameMode> GAMEMODES = new ArrayList<>();
+    private static final List<GameMode> GAMEMODES = new ArrayList<>();
     private static final Map<UUID, Optional<PlayerInfo>> TIERS = new ConcurrentHashMap<>();
 
     /**
@@ -34,7 +34,7 @@ public class TierCache {
 
             if (list.fetchUnknown() != null) {
                 FETCH_UNKNOWN.set(list.fetchUnknown());
-                if (Boolean.FALSE.equals(list.fetchUnknown())) {
+                if (!list.fetchUnknown()) {
                     TierTagger.getLogger().warn("The remote API set `fetchUnknown` to false! Make sure you are using a tierlist that supports this feature!");
                 }
             }
@@ -50,6 +50,14 @@ public class TierCache {
             TierTagger.getLogger().error("Failed to load gamemodes!", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+    }
+
+    public static List<GameMode> getGamemodes() {
+        if (GAMEMODES.isEmpty()) {
+            return Collections.singletonList(GameMode.NONE);
+        } else {
+            return GAMEMODES;
         }
     }
 
@@ -80,11 +88,19 @@ public class TierCache {
     }
 
     public static GameMode findNextMode(GameMode current) {
-        return GAMEMODES.get((GAMEMODES.indexOf(current) + 1) % GAMEMODES.size());
+        if (GAMEMODES.isEmpty()) {
+            return GameMode.NONE;
+        } else {
+            return GAMEMODES.get((GAMEMODES.indexOf(current) + 1) % GAMEMODES.size());
+        }
     }
 
-    public static GameMode findMode(String id) {
-        return GAMEMODES.stream().filter(m -> m.id().equalsIgnoreCase(id)).findFirst().orElseThrow();
+    public static Optional<GameMode> findMode(String id) {
+        return GAMEMODES.stream().filter(m -> m.id().equalsIgnoreCase(id)).findFirst();
+    }
+
+    public static GameMode findModeOrUgly(String id) {
+        return findMode(id).orElseGet(() -> new GameMode(id, id));
     }
 
     private static UUID parseUUID(String uuid) {

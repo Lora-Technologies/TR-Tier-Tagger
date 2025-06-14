@@ -10,7 +10,7 @@ import lombok.Setter;
 import net.minecraft.util.TranslatableOption;
 
 import java.io.Serializable;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -36,11 +36,12 @@ public class TierTaggerConfig implements Serializable {
     private String baseUrl = "https://api.uku3lig.net/tiers";
 
     public GameMode getGameMode() {
-        try {
-            return TierCache.findMode(this.gameMode);
-        } catch (NoSuchElementException e) {
-            GameMode first = TierCache.GAMEMODES.getFirst();
-            this.gameMode = first.id();
+        Optional<GameMode> opt = TierCache.findMode(this.gameMode);
+        if (opt.isPresent()) {
+            return opt.get();
+        } else {
+            GameMode first = TierCache.getGamemodes().getFirst();
+            if (!first.isNone()) this.gameMode = first.id();
             return first;
         }
     }
