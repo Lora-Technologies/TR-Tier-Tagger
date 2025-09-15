@@ -97,6 +97,7 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
     @Getter
     @AllArgsConstructor
     public enum PointInfo {
+        COMBAT_GRANDMASTER("Combat Grandmaster", 0xE6C622, 0xFDE047),
         COMBAT_MASTER("Combat Master", 0xFBB03B, 0xFFD13A),
         COMBAT_ACE("Combat Ace", 0xCD285C, 0xD65474),
         COMBAT_SPECIALIST("Combat Specialist", 0xAD78D8, 0xC7A3E8),
@@ -111,7 +112,9 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
     }
 
     public PointInfo getPointInfo() {
-        if (this.combatMaster || this.points >= 200 && this.rankings.values().stream().allMatch(r -> r.tier <= 2 || (r.peakTier != null && r.peakTier <= 2))) {
+        if (this.points >= 400) {
+            return PointInfo.COMBAT_GRANDMASTER;
+        } else if (this.points >= 250) {
             return PointInfo.COMBAT_MASTER;
         } else if (this.points >= 100) {
             return PointInfo.COMBAT_ACE;
