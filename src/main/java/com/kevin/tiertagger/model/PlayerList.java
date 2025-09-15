@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 
 public record PlayerList(List<PlayerInfo> players, List<UUID> unknown, @SerializedName("fetch_unknown") @Nullable Boolean fetchUnknown) {
     public static CompletableFuture<PlayerList> get(HttpClient client) {
-        String endpoint = TierTagger.getManager().getConfig().getBaseUrl() + "/all";
+        String endpoint = TierTagger.getManager().getConfig().getApiUrl() + "/all";
         final HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint)).GET().build();
 
         return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())

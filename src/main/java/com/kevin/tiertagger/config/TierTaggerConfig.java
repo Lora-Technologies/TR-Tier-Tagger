@@ -31,9 +31,9 @@ public class TierTaggerConfig implements Serializable {
 
     /**
      * <p>the field was renamed to do a little trolling and force it setting to the default value in players' config</p>
-     * <p>previous name(s): {@code apiUrl}</p>
+     * <p>previous name(s): {@code baseUrl}</p>
      */
-    private String baseUrl = "https://api.uku3lig.net/tiers";
+    private String apiUrl = "https://mctiers.com/api";
 
     public GameMode getGameMode() {
         Optional<GameMode> opt = TierCache.findMode(this.gameMode);

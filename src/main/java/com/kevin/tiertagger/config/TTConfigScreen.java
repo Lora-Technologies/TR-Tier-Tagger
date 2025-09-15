@@ -55,13 +55,13 @@ public class TTConfigScreen extends TabbedConfigScreen<TierTaggerConfig> {
 
         @Override
         protected WidgetCreator[] getWidgets(TierTaggerConfig config) {
-            Optional<TierList> current = TierList.findByUrl(config.getBaseUrl());
+            Optional<TierList> current = TierList.findByUrl(config.getApiUrl());
 
             List<WidgetCreator> widgets = Arrays.stream(TierList.values())
                     .map(t -> {
                         boolean isCurrent = current.isPresent() && current.get() == t;
-                        return new SimpleButton(t.styledName(isCurrent), b -> {
-                            config.setBaseUrl(t.getUrl());
+                        return new SimpleButton(Text.of(t.styledName(isCurrent)), b -> {
+                            config.setApiUrl(t.getUrl());
                             TierTagger.getManager().saveConfig();
                             TTConfigScreen.this.close();
                             TierCache.init();
@@ -71,7 +71,7 @@ public class TTConfigScreen extends TabbedConfigScreen<TierTaggerConfig> {
                     .collect(Collectors.toList());
 
             if (current.isEmpty()) {
-                widgets.add(new SimpleButton("Custom (selected, " + config.getBaseUrl() + ")", b -> {}));
+                widgets.add(new SimpleButton(Text.of("Custom (selected, " + config.getApiUrl() + ")"), b -> {}));
             }
 
             return widgets.toArray(WidgetCreator[]::new);
