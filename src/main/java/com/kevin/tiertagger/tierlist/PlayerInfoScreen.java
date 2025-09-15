@@ -67,7 +67,7 @@ public class PlayerInfoScreen extends CloseableScreen {
                         if (t != null) {
                             this.everythingIsAwesome = false;
                         } else {
-                            int rankingHeight = this.info.rankings().size() * 10;
+                            int rankingHeight = this.info.rankings().size() * 11;
                             int infoHeight = 56; // 4 lines of text (10 px tall) + 6 px padding
                             int startY = (this.height - infoHeight - rankingHeight) / 2;
                             int rankingY = startY + infoHeight;
@@ -106,7 +106,7 @@ public class PlayerInfoScreen extends CloseableScreen {
         if (this.texture != null && this.info != null) {
             context.drawTexture(texture, this.width / 2 - 65, (this.height - 144) / 2, 0, 0, 60, 144, 60, 144);
 
-            int rankingHeight = this.info.rankings().size() * 10;
+            int rankingHeight = this.info.rankings().size() * 11;
             int infoHeight = 56; // 4 lines of text (10 px tall) + 6 px padding
             int startY = (this.height - infoHeight - rankingHeight) / 2;
 
