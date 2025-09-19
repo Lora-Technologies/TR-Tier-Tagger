@@ -21,7 +21,7 @@ public record PlayerList(List<PlayerInfo> players, List<UUID> unknown, @Serializ
                 .thenApply(HttpResponse::body)
                 .thenApply(s -> TierTagger.GSON.fromJson(s, PlayerList.class))
                 .whenComplete((i, t) -> {
-                    if (t != null) TierTagger.getLogger().warn("Error fetching tier list", t);
+                    if (t != null) TierTagger.getLogger().warn("Could not fetch /all, this is probably intentional");
                 });
     }
 }
