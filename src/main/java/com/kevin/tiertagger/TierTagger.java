@@ -170,18 +170,22 @@ public class TierTagger implements ModInitializer {
     }
 
     private static Text printPlayerInfo(PlayerInfo info) {
-        MutableText text = Text.empty().append("=== Rankings for " + info.name() + " ===");
+        if (info.rankings().isEmpty()) {
+            return Text.literal(info.name() + " does not have any tiers.");
+        } else {
+            MutableText text = Text.empty().append("=== Rankings for " + info.name() + " ===");
 
-        info.rankings().forEach((m, r) -> {
-            if (m == null) return;
-            GameMode mode = TierCache.findModeOrUgly(m);
-            String tier = getTierText(r);
+            info.rankings().forEach((m, r) -> {
+                if (m == null) return;
+                GameMode mode = TierCache.findModeOrUgly(m);
+                String tier = getTierText(r);
 
-            Text tierText = Text.literal(tier).styled(s -> s.withColor(getTierColor(tier)));
-            text.append(Text.literal("\n").append(mode.asStyled(true)).append(": ").append(tierText));
-        });
+                Text tierText = Text.literal(tier).styled(s -> s.withColor(getTierColor(tier)));
+                text.append(Text.literal("\n").append(mode.asStyled(true)).append(": ").append(tierText));
+            });
 
-        return text;
+            return text;
+        }
     }
 
     public static int getTierColor(String tier) {
