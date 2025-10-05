@@ -11,7 +11,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.PlayerSkinWidget;
 import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.uku3lig.ukulib.config.screen.CloseableScreen;
@@ -77,29 +76,13 @@ public class PlayerInfoScreen extends CloseableScreen {
     }
 
     private Text formatTier(@NotNull GameMode gamemode, PlayerInfo.Ranking tier) {
-        MutableText tierText = getTierText(tier.tier(), tier.pos(), tier.retired());
-
-        if (tier.comparablePeak() < tier.comparableTier()) {
-            // warning caused by potential NPE by unboxing of peak{Tier,Pos} which CANNOT happen, see impl of comparablePeak
-            // noinspection DataFlowIssue
-            tierText = tierText.append(Text.literal(" (peak: ").styled(s -> s.withColor(Formatting.GRAY)))
-                    .append(getTierText(tier.peakTier(), tier.peakPos(), tier.retired()))
-                    .append(Text.literal(")").styled(s -> s.withColor(Formatting.GRAY)));
-        }
+        Text tierText = TierTagger.getTierText(tier.tier(), tier.pos(), tier.retired());
+        tierText = TierTagger.appendPeakTier(tier, tierText);
 
         return Text.empty()
                 .append(gamemode.asStyled(true))
                 .append(Text.literal(": ").formatted(Formatting.GRAY))
                 .append(tierText);
-    }
-
-    private MutableText getTierText(int tier, int pos, boolean retired) {
-        StringBuilder text = new StringBuilder();
-        if (retired) text.append("R");
-        text.append(pos == 0 ? "H" : "L").append("T").append(tier);
-
-        int color = TierTagger.getTierColor(text.toString());
-        return Text.literal(text.toString()).styled(s -> s.withColor(color));
     }
 
     private Text getRegionText(PlayerInfo info) {
@@ -131,7 +114,7 @@ public class PlayerInfoScreen extends CloseableScreen {
     }
 
     private int points(PlayerInfo.Ranking ranking) {
-        String tier = getTierText(ranking.tier(), ranking.pos(), false).getString();
+        String tier = TierTagger.getTierText(ranking.tier(), ranking.pos(), false).getString();
 
         return switch (tier) {
             case "HT1" -> 60;

@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -88,7 +89,7 @@ public class TierTagger implements ModInitializer {
         MutableText following = switch (manager.getConfig().getShownStatistic()) {
             case TIER -> getPlayerTier(player.getUuid())
                     .map(entry -> {
-                        String tier = getTierText(entry.ranking());
+                        String tier = getTierString(entry.ranking());
                         MutableText tierText = Text.literal(tier).withColor(getTierColor(tier));
 
                         if (manager.getConfig().isShowIcons() && entry.mode() != null && entry.mode().icon().isPresent()) {
@@ -137,12 +138,31 @@ public class TierTagger implements ModInitializer {
     }
 
     @NotNull
-    public static String getTierText(PlayerInfo.Ranking ranking) {
+    public static String getTierString(PlayerInfo.Ranking ranking) {
         if (manager.getConfig().isShowRetired() && ranking.retired() && ranking.peakTier() != null && ranking.peakPos() != null) {
             return "R" + (ranking.peakPos() == 0 ? "H" : "L") + "T" + ranking.peakTier();
         } else {
             return (ranking.pos() == 0 ? "H" : "L") + "T" + ranking.tier();
         }
+    }
+
+    public static Text getTierText(int tier, int pos, boolean retired) {
+        StringBuilder text = new StringBuilder();
+        if (retired) text.append("R");
+        text.append(pos == 0 ? "H" : "L").append("T").append(tier);
+
+        int color = TierTagger.getTierColor(text.toString());
+        return Text.literal(text.toString()).styled(s -> s.withColor(color));
+    }
+
+    public static Text appendPeakTier(PlayerInfo.Ranking tier, Text tierText) {
+        if (tier.comparablePeak() >= tier.comparableTier()) return tierText;
+
+        // warning caused by potential NPE by unboxing of peak{Tier,Pos} which CANNOT happen, see impl of comparablePeak
+        // noinspection DataFlowIssue
+       return tierText.copy().append(Text.literal(" (peak: ").styled(s -> s.withColor(Formatting.GRAY)))
+                .append(getTierText(tier.peakTier(), tier.peakPos(), tier.retired()))
+                .append(Text.literal(")").styled(s -> s.withColor(Formatting.GRAY)));
     }
 
     private static int displayTierInfo(CommandContext<FabricClientCommandSource> ctx) {
@@ -159,7 +179,7 @@ public class TierTagger implements ModInitializer {
         } else {
             ctx.getSource().sendFeedback(Text.of("[TierTagger] Searching..."));
             TierCache.searchPlayer(selector.name())
-                    .thenAccept(p -> ctx.getSource().sendFeedback(printPlayerInfo(p)))
+                    .thenAccept(p -> MinecraftClient.getInstance().execute(() -> ctx.getSource().sendFeedback(printPlayerInfo(p))))
                     .exceptionally(t -> {
                         ctx.getSource().sendError(Text.of("Could not find player " + selector.name()));
                         return null;
@@ -178,9 +198,10 @@ public class TierTagger implements ModInitializer {
             info.rankings().forEach((m, r) -> {
                 if (m == null) return;
                 GameMode mode = TierCache.findModeOrUgly(m);
-                String tier = getTierText(r);
+                String tier = getTierString(r);
 
                 Text tierText = Text.literal(tier).styled(s -> s.withColor(getTierColor(tier)));
+                tierText = appendPeakTier(r, tierText);
                 text.append(Text.literal("\n").append(mode.asStyled(true)).append(": ").append(tierText));
             });
 
