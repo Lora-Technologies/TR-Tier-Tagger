@@ -160,7 +160,7 @@ public class TierTagger implements ModInitializer {
 
         // warning caused by potential NPE by unboxing of peak{Tier,Pos} which CANNOT happen, see impl of comparablePeak
         // noinspection DataFlowIssue
-       return tierText.copy().append(Text.literal(" (peak: ").styled(s -> s.withColor(Formatting.GRAY)))
+        return tierText.copy().append(Text.literal(" (peak: ").styled(s -> s.withColor(Formatting.GRAY)))
                 .append(getTierText(tier.peakTier(), tier.peakPos(), tier.retired()))
                 .append(Text.literal(")").styled(s -> s.withColor(Formatting.GRAY)));
     }
