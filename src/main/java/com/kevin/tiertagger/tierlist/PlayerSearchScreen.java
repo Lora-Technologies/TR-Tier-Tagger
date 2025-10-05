@@ -23,7 +23,6 @@ import net.uku3lig.ukulib.utils.Ukutils;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.function.Supplier;
 
 public class PlayerSearchScreen extends CloseableScreen {
@@ -83,17 +82,16 @@ public class PlayerSearchScreen extends CloseableScreen {
             return skin;
         });
 
-        try {
-            PlayerInfoScreen screen = TierCache.searchPlayer(username)
-                    .thenCombine(skinFuture, (info, skin) -> new PlayerInfoScreen(this, info, skin))
-                    .join();
-            MinecraftClient.getInstance().setScreen(screen);
-        } catch (CompletionException e) {
-            Ukutils.sendToast(Text.translatable("tiertagger.search.unknown"), null);
-        }
-
-        this.searching = false;
-        this.searchButton.setMessage(Text.translatable("tiertagger.search"));
+        TierCache.searchPlayer(username)
+                .thenCombine(skinFuture, (info, skin) -> new PlayerInfoScreen(this, info, skin))
+                .thenAccept(screen -> MinecraftClient.getInstance().execute(() -> MinecraftClient.getInstance().setScreen(screen)))
+                .whenComplete((v, t) -> {
+                    if (t != null) {
+                        Ukutils.sendToast(Text.translatable("tiertagger.search.unknown"), null);
+                    }
+                    this.searching = false;
+                    this.searchButton.setMessage(Text.translatable("tiertagger.search"));
+                });
     }
 
     private CompletableFuture<GameProfile> fetchProfile(String username, ApiServices services) {
