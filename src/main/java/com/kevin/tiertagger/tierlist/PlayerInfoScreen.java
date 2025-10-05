@@ -75,9 +75,8 @@ public class PlayerInfoScreen extends CloseableScreen {
         context.drawTextWithShadow(this.textRenderer, "Rankings:", this.width / 2 + 5, startY + 45, 0xFFFFFFFF);
     }
 
-    private Text formatTier(@NotNull GameMode gamemode, PlayerInfo.Ranking tier) {
-        Text tierText = TierTagger.getTierText(tier.tier(), tier.pos(), tier.retired());
-        tierText = TierTagger.appendPeakTier(tier, tierText);
+    private Text formatTier(@NotNull GameMode gamemode, PlayerInfo.Ranking ranking) {
+        Text tierText = TierTagger.getRankingText(ranking, true);
 
         return Text.empty()
                 .append(gamemode.asStyled(true))
@@ -114,19 +113,12 @@ public class PlayerInfoScreen extends CloseableScreen {
     }
 
     private int points(PlayerInfo.Ranking ranking) {
-        String tier = TierTagger.getTierText(ranking.tier(), ranking.pos(), false).getString();
-
-        return switch (tier) {
-            case "HT1" -> 60;
-            case "LT1" -> 45;
-            case "HT2" -> 30;
-            case "LT2" -> 20;
-            case "HT3" -> 10;
-            case "LT3" -> 6;
-            case "HT4" -> 4;
-            case "LT4" -> 3;
-            case "HT5" -> 2;
-            case "LT5" -> 1;
+        return switch (ranking.tier()) {
+            case 1 -> ranking.pos() == 0 ? 60 : 45;
+            case 2 -> ranking.pos() == 0 ? 30 : 20;
+            case 3 -> ranking.pos() == 0 ? 10 : 6;
+            case 4 -> ranking.pos() == 0 ? 4 : 3;
+            case 5 -> ranking.pos() == 0 ? 2 : 1;
             default -> 0;
         };
     }

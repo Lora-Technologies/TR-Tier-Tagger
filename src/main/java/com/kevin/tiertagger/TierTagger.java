@@ -25,7 +25,6 @@ import net.minecraft.util.Formatting;
 import net.uku3lig.ukulib.config.ConfigManager;
 import net.uku3lig.ukulib.utils.PlayerArgumentType;
 import net.uku3lig.ukulib.utils.Ukutils;
-import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,13 +88,12 @@ public class TierTagger implements ModInitializer {
         MutableText following = switch (manager.getConfig().getShownStatistic()) {
             case TIER -> getPlayerTier(player.getUuid())
                     .map(entry -> {
-                        String tier = getTierString(entry.ranking());
-                        MutableText tierText = Text.literal(tier).withColor(getTierColor(tier));
+                        Text tierText = getRankingText(entry.ranking(), false);
 
                         if (manager.getConfig().isShowIcons() && entry.mode() != null && entry.mode().icon().isPresent()) {
                             return Text.literal(entry.mode().icon().get().toString()).append(tierText);
                         } else {
-                            return tierText;
+                            return tierText.copy();
                         }
                     })
                     .orElse(null);
@@ -137,16 +135,7 @@ public class TierTagger implements ModInitializer {
                 });
     }
 
-    @NotNull
-    public static String getTierString(PlayerInfo.Ranking ranking) {
-        if (manager.getConfig().isShowRetired() && ranking.retired() && ranking.peakTier() != null && ranking.peakPos() != null) {
-            return "R" + (ranking.peakPos() == 0 ? "H" : "L") + "T" + ranking.peakTier();
-        } else {
-            return (ranking.pos() == 0 ? "H" : "L") + "T" + ranking.tier();
-        }
-    }
-
-    public static Text getTierText(int tier, int pos, boolean retired) {
+    private static MutableText getTierText(int tier, int pos, boolean retired) {
         StringBuilder text = new StringBuilder();
         if (retired) text.append("R");
         text.append(pos == 0 ? "H" : "L").append("T").append(tier);
@@ -155,14 +144,22 @@ public class TierTagger implements ModInitializer {
         return Text.literal(text.toString()).styled(s -> s.withColor(color));
     }
 
-    public static Text appendPeakTier(PlayerInfo.Ranking tier, Text tierText) {
-        if (tier.comparablePeak() >= tier.comparableTier()) return tierText;
+    public static Text getRankingText(PlayerInfo.Ranking ranking, boolean showPeak) {
+        if (ranking.retired() && ranking.peakTier() != null && ranking.peakPos() != null) {
+            return getTierText(ranking.peakTier(), ranking.peakPos(), true);
+        } else {
+            MutableText tierText = getTierText(ranking.tier(), ranking.pos(), false);
 
-        // warning caused by potential NPE by unboxing of peak{Tier,Pos} which CANNOT happen, see impl of comparablePeak
-        // noinspection DataFlowIssue
-        return tierText.copy().append(Text.literal(" (peak: ").styled(s -> s.withColor(Formatting.GRAY)))
-                .append(getTierText(tier.peakTier(), tier.peakPos(), tier.retired()))
-                .append(Text.literal(")").styled(s -> s.withColor(Formatting.GRAY)));
+            if (showPeak && ranking.comparablePeak() < ranking.comparableTier()) {
+                // warning caused by potential NPE by unboxing of peak{Tier,Pos} which CANNOT happen, see impl of comparablePeak
+                // noinspection DataFlowIssue
+                tierText.append(Text.literal(" (peak: ").styled(s -> s.withColor(Formatting.GRAY)))
+                        .append(getTierText(ranking.peakTier(), ranking.peakPos(), false))
+                        .append(Text.literal(")").styled(s -> s.withColor(Formatting.GRAY)));
+            }
+
+            return tierText;
+        }
     }
 
     private static int displayTierInfo(CommandContext<FabricClientCommandSource> ctx) {
@@ -198,10 +195,7 @@ public class TierTagger implements ModInitializer {
             info.rankings().forEach((m, r) -> {
                 if (m == null) return;
                 GameMode mode = TierCache.findModeOrUgly(m);
-                String tier = getTierString(r);
-
-                Text tierText = Text.literal(tier).styled(s -> s.withColor(getTierColor(tier)));
-                tierText = appendPeakTier(r, tierText);
+                Text tierText = getRankingText(r, true);
                 text.append(Text.literal("\n").append(mode.asStyled(true)).append(": ").append(tierText));
             });
 
