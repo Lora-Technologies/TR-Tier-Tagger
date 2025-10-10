@@ -22,6 +22,7 @@ public class TierTaggerConfig implements Serializable {
     private boolean showRetired = true;
     private HighestMode highestMode = HighestMode.NOT_FOUND;
     private boolean showIcons = true;
+    private boolean playerList = true;
     private int retiredColor = 0xa2d6ff;
     // note: this is a GSON internal class. this *might* break in the future
     private LinkedTreeMap<String, Integer> tierColors = defaultColors();

@@ -18,7 +18,6 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -85,8 +84,8 @@ public class TierTagger implements ModInitializer {
         checkForUpdates();
     }
 
-    public static Text appendTier(PlayerEntity player, Text text) {
-        MutableText following = getPlayerTier(player.getUuid())
+    public static Text appendTier(UUID uuid, Text text) {
+        MutableText following = getPlayerTier(uuid)
                 .map(entry -> {
                     Text tierText = getRankingText(entry.ranking(), false);
 

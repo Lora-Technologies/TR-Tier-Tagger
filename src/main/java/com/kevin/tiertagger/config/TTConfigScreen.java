@@ -41,6 +41,7 @@ public class TTConfigScreen extends TabbedConfigScreen<TierTaggerConfig> {
                     CyclingOption.ofBoolean("tiertagger.config.retired", config.isShowRetired(), config::setShowRetired),
                     CyclingOption.ofTranslatableEnum("tiertagger.config.highest", TierTaggerConfig.HighestMode.class, config.getHighestMode(), config::setHighestMode, SimpleOption.constantTooltip(Text.translatable("tiertagger.config.highest.desc"))),
                     CyclingOption.ofBoolean("tiertagger.config.icons", config.isShowIcons(), config::setShowIcons),
+                    CyclingOption.ofBoolean("tiertagger.config.playerList", config.isPlayerList(), config::setPlayerList),
                     new SimpleButton("tiertagger.clear", b -> TierCache.clearCache()),
                     new ScreenOpenButton("tiertagger.config.search", PlayerSearchScreen::new)
             };
