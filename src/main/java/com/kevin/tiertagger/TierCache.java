@@ -2,14 +2,12 @@ package com.kevin.tiertagger;
 
 import com.kevin.tiertagger.model.GameMode;
 import com.kevin.tiertagger.model.PlayerInfo;
-import com.kevin.tiertagger.model.PlayerList;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 public class TierCache {
     private static final List<GameMode> GAMEMODES = new ArrayList<>();
@@ -24,24 +22,6 @@ public class TierCache {
     private static final AtomicBoolean FETCH_UNKNOWN = new AtomicBoolean(true);
 
     public static void init() {
-        PlayerList.get(TierTagger.getClient()).thenAccept(list -> {
-            Map<UUID, Optional<PlayerInfo>> players = list.players().stream().collect(Collectors.toMap(p -> parseUUID(p.uuid()), Optional::of));
-            Map<UUID, Optional<PlayerInfo>> unknown = list.unknown().stream().collect(Collectors.toMap(u -> u, u -> Optional.empty()));
-
-            TIERS.clear();
-            TIERS.putAll(players);
-            TIERS.putAll(unknown);
-
-            if (list.fetchUnknown() != null) {
-                FETCH_UNKNOWN.set(list.fetchUnknown());
-                if (!list.fetchUnknown()) {
-                    TierTagger.getLogger().warn("The remote API set `fetchUnknown` to false! Make sure you are using a tierlist that supports this feature!");
-                }
-            }
-
-            TierTagger.getLogger().info("Loaded {} players and {} unknown", players.size(), unknown.size());
-        });
-
         try {
             GAMEMODES.clear();
             GAMEMODES.addAll(GameMode.fetchGamemodes(TierTagger.getClient()).get());
