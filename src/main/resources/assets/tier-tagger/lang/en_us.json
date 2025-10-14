@@ -18,8 +18,6 @@
   "tiertagger.search.loading": "Loading...",
   "tiertagger.search.unknown": "Unknown player",
   "tiertagger.clear": "Clear Tiers Cache",
-  "tiertagger.stat.tier": "Tier",
-  "tiertagger.stat.rank": "Rank",
   "tiertagger.highest.never": "Never",
   "tiertagger.highest.not_found": "When Not Found",
   "tiertagger.highest.always": "Always",

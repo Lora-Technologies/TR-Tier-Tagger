@@ -21,7 +21,6 @@ public class TierTaggerConfig implements Serializable {
     private String gameMode = "vanilla";
     private boolean showRetired = true;
     private HighestMode highestMode = HighestMode.NOT_FOUND;
-    private Statistic shownStatistic = Statistic.TIER;
     private boolean showIcons = true;
     private int retiredColor = 0xa2d6ff;
     // note: this is a GSON internal class. this *might* break in the future
@@ -60,17 +59,6 @@ public class TierTaggerConfig implements Serializable {
         colors.put("LT5", 0x655b79);
 
         return colors;
-    }
-
-    @Getter
-    @AllArgsConstructor
-    public enum Statistic implements TranslatableOption {
-        TIER(0, "tiertagger.stat.tier"),
-        RANK(1, "tiertagger.stat.rank"),
-        ;
-
-        private final int id;
-        private final String translationKey;
     }
 
     @Getter

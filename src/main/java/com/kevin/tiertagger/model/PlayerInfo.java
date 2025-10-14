@@ -1,6 +1,7 @@
 package com.kevin.tiertagger.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 import com.kevin.tiertagger.TierCache;
 import com.kevin.tiertagger.TierTagger;
 import lombok.AllArgsConstructor;
@@ -71,6 +72,18 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
                 });
     }
 
+    public static CompletableFuture<Map<String, Ranking>> getRankings(HttpClient client, UUID uuid) {
+        String endpoint = TierTagger.getManager().getConfig().getApiUrl() + "/rankings/" + uuid.toString().replace("-", "");
+        final HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint)).GET().build();
+
+        return client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenApply(s -> TierTagger.GSON.fromJson(s, new TypeToken<Map<String, Ranking>>() {}))
+                .whenComplete((i, t) -> {
+                    if (t != null) TierTagger.getLogger().warn("Error getting player rankings ({})", uuid, t);
+                });
+    }
+
     public static CompletableFuture<PlayerInfo> search(HttpClient client, String query) {
         String endpoint = TierTagger.getManager().getConfig().getApiUrl() + "/search_profile/" + query;
         final HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint)).GET().build();
@@ -87,8 +100,8 @@ public record PlayerInfo(String uuid, String name, Map<String, Ranking> rankings
         return REGION_COLORS.getOrDefault(this.region.toUpperCase(Locale.ROOT), 0xffffff);
     }
 
-    public Optional<NamedRanking> getHighestRanking() {
-        return this.rankings.entrySet().stream()
+    public static Optional<NamedRanking> getHighestRanking(Map<String, Ranking> rankings) {
+        return rankings.entrySet().stream()
                 .filter(e -> e.getKey() != null)
                 .min(Comparator.comparingInt(e -> e.getValue().comparableTier()))
                 .map(e -> e.getValue().asNamed(TierCache.findModeOrUgly(e.getKey())));

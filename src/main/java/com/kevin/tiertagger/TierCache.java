@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TierCache {
     private static final List<GameMode> GAMEMODES = new ArrayList<>();
-    private static final Map<UUID, Optional<PlayerInfo>> TIERS = new ConcurrentHashMap<>();
+    private static final Map<UUID, Optional<Map<String, PlayerInfo.Ranking>>> TIERS = new ConcurrentHashMap<>();
 
     /**
      * <p>whether to fetch info about players that are not in the initial database queried from {@code /all}.</p>
@@ -41,11 +41,11 @@ public class TierCache {
         }
     }
 
-    public static Optional<PlayerInfo> getPlayerInfo(UUID uuid) {
+    public static Optional<Map<String, PlayerInfo.Ranking>> getPlayerRankings(UUID uuid) {
         if (FETCH_UNKNOWN.get()) {
             return TIERS.computeIfAbsent(uuid, u -> {
                 if (uuid.version() == 4) {
-                    PlayerInfo.get(TierTagger.getClient(), uuid).thenAccept(info -> TIERS.put(uuid, Optional.ofNullable(info)));
+                    PlayerInfo.getRankings(TierTagger.getClient(), uuid).thenAccept(info -> TIERS.put(uuid, Optional.ofNullable(info)));
                 }
 
                 return Optional.empty();
@@ -58,7 +58,7 @@ public class TierCache {
     public static CompletableFuture<PlayerInfo> searchPlayer(String query) {
         return PlayerInfo.search(TierTagger.getClient(), query).thenApply(p -> {
             UUID uuid = parseUUID(p.uuid());
-            TIERS.put(uuid, Optional.of(p));
+            TIERS.put(uuid, Optional.of(p.rankings()));
             return p;
         });
     }
