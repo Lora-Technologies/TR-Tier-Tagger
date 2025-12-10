@@ -7,19 +7,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TierCache {
     private static final List<GameMode> GAMEMODES = new ArrayList<>();
     private static final Map<UUID, Optional<Map<String, PlayerInfo.Ranking>>> TIERS = new ConcurrentHashMap<>();
-
-    /**
-     * <p>whether to fetch info about players that are not in the initial database queried from {@code /all}.</p>
-     * <p>it's useful to set this to false when {@code /all} returns <i>all</i> the players contained in the database.</p>
-     * <p>this used to be a config value, but it's better to leave that choice fully to the server</p>
-     * <p>default value is {@code true} to retain some sort of backwards compatibility</p>
-     */
-    private static final AtomicBoolean FETCH_UNKNOWN = new AtomicBoolean(true);
 
     public static void init() {
         try {
@@ -42,17 +33,13 @@ public class TierCache {
     }
 
     public static Optional<Map<String, PlayerInfo.Ranking>> getPlayerRankings(UUID uuid) {
-        if (FETCH_UNKNOWN.get()) {
-            return TIERS.computeIfAbsent(uuid, u -> {
-                if (uuid.version() == 4) {
-                    PlayerInfo.getRankings(TierTagger.getClient(), uuid).thenAccept(info -> TIERS.put(uuid, Optional.ofNullable(info)));
-                }
+        return TIERS.computeIfAbsent(uuid, u -> {
+            if (uuid.version() == 4) {
+                PlayerInfo.getRankings(TierTagger.getClient(), uuid).thenAccept(info -> TIERS.put(uuid, Optional.ofNullable(info)));
+            }
 
-                return Optional.empty();
-            });
-        } else {
-            return TIERS.getOrDefault(uuid, Optional.empty());
-        }
+            return Optional.empty();
+        });
     }
 
     public static CompletableFuture<PlayerInfo> searchPlayer(String query) {
