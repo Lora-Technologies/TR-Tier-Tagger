@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "trtier",
-  "version": "${version}",
+  "version": "1.0.0+mc1.20.1",
   "name": "TR Tier Tagger",
-  "description": "Displays player tiers from the Turkish PvP Tierlist in-game. Developed by Lora Technologies, based on TierTagger by mctiers-dev.",
+  "description": "Turkiye PvP Tier sistemi - Oyuncularin tier bilgilerini gosterir!",
   "authors": [
-    "Lora Technologies",
-    "mctiers-dev (original)"
+    "Lora Technologies"
   ],
   "contact": {
     "homepage": "https://loratech.dev",
@@ -28,6 +27,6 @@
   ],
   "depends": {
     "fabricloader": ">=0.15",
-    "minecraft": "${minecraft_version}"
+    "minecraft": "1.20.1"
   }
 }

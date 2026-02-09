@@ -1,0 +1,14 @@
+{
+  "trtier.config.enabled": "Aktif",
+  "trtier.config.gamemode": "Kit Secimi",
+  "trtier.config.highest": "En Yuksek Tier Goster",
+  "trtier.config.icons": "Kit Ikonlarini Goster",
+  "trtier.clear": "Cache Temizle",
+  "trtier.keybind.gamemode": "Kit Degistir",
+  "trtier.name": "TRTier",
+  "trtier.highest.never": "Asla",
+  "trtier.highest.not_found": "Bulunamazsa",
+  "trtier.highest.always": "Her Zaman",
+  "trtier.search": "Ara",
+  "trtier.search.user": "Kullanici Adi"
+}

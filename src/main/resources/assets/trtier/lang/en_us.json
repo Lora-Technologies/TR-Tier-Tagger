@@ -1,0 +1,14 @@
+{
+  "trtier.config.enabled": "Enabled",
+  "trtier.config.gamemode": "Kit Selection",
+  "trtier.config.highest": "Show Highest Tier",
+  "trtier.config.icons": "Show Kit Icons",
+  "trtier.clear": "Clear Cache",
+  "trtier.keybind.gamemode": "Switch Kit",
+  "trtier.name": "TRTier",
+  "trtier.highest.never": "Never",
+  "trtier.highest.not_found": "When Not Found",
+  "trtier.highest.always": "Always",
+  "trtier.search": "Search",
+  "trtier.search.user": "Username"
+}
